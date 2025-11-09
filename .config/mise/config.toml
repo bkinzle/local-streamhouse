@@ -1,0 +1,30 @@
+# mise configuration file
+min_version = "2025.11.3"
+
+# Tools to install and their versions
+[tools]
+# node = "20"
+# python = "3.12"
+# go = "1.21"
+# terraform = "1.6"
+
+# Settings
+[settings]
+# experimental = true
+# verbose = false
+# jobs = 4
+
+# Plugins configuration
+# [plugins]
+# python = "https://github.com/asdf-community/asdf-python.git"
+
+# Environment variables
+[env]
+# _.file = ".env"
+# _.path = "/some/path"
+
+# Task definitions
+[tasks]
+# build = "echo 'Building project...'"
+# test = "echo 'Running tests...'"
+# dev = "echo 'Starting dev server...'"
