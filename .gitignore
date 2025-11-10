@@ -1,0 +1,5 @@
+.DS_Store
+
+# for generated local config files
+.local-registry
+.cluster-config

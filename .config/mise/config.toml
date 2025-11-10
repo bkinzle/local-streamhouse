@@ -20,11 +20,61 @@ min_version = "2025.11.3"
 
 # Environment variables
 [env]
-# _.file = ".env"
-# _.path = "/some/path"
+STACK_NAME = "local-o11y"
+LOCAL_REGISTRY_NAME = "{{ env.STACK_NAME }}-registry"
+LOCAL_REGISTRY_PORT = "5010"
+INCLUSTER_REGISTRY_PORT = "4678"
+KUBERNETES_VERSION = "1.34.0"
 
 # Task definitions
-[tasks]
-# build = "echo 'Building project...'"
-# test = "echo 'Running tests...'"
-# dev = "echo 'Starting dev server...'"
+[tasks.check-tool]
+  description = "Checks if a tool is installed and exits with an error if not"
+  hide = true
+  quiet = true
+  usage = '''
+  arg "<tool>" help="The tool to check for installation"
+  '''
+  run = '''
+  if ! command -v "${usage_tool:?}" >/dev/null 2>&1; then
+    echo "    Error: ${usage_tool:?} is not installed; install it and rerun setup." >&2
+    exit 1
+  fi
+  '''
+
+[tasks.check-prerequisites]
+  description = "Checks for all prerequisite tools"
+  run = '''
+  tools=("envsubst" "docker" "kind" "kubectl" "helm")
+  for tool in "${tools[@]}"; do
+    mise run check-tool "$tool"
+  done
+  '''
+
+[tasks.check-kubecontext]
+  description = "Checks if your current kubecontext is set to a local kind cluster and fails if not"
+  hide = true
+  quiet = true
+  run = '''
+  current_context=$(kubectl config current-context)
+  if [[ ! "$current_context" =~ ^kind- ]]; then
+    echo "    Error: Current kubecontext '$current_context' is not a kind cluster (must start with 'kind-')" >&2
+    exit 1
+  fi
+  '''
+
+[tasks."infra:setup"]
+  description = "Sets up the entire local-first development environment"
+  depends = ["check-prerequisites"]
+  run = '''
+  echo "Setting up the development environment..."
+  '''
+
+[tasks."infra:teardown"]
+  description = "Tears down the local-first development environment"
+  depends = ["check-kubecontext"]
+  run = '''
+  echo "Tearing down the development environment..."
+
+  kind delete clusters ${STACK_NAME} || true
+  docker rm -f ${LOCAL_REGISTRY_NAME} &>/dev/null || true
+  ''' 
