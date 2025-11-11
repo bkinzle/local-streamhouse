@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #MISE description="Set up a local oci artifact registry"
-#MISE depends=["check-kubecontext"]
+#MISE depends=["check:kubecontext"]
 
 docker run \
   -d --restart=always -p "127.0.0.1:${LOCAL_REGISTRY_PORT}:${INCLUSTER_REGISTRY_PORT}" --name "${LOCAL_REGISTRY_NAME}" \
