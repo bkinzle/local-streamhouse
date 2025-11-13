@@ -21,6 +21,7 @@ min_version = "2025.11.3"
 # Environment variables
 [env]
 STACK_NAME = "local-o11y"
+DNSMASQ_DOMAIN = "localtest.me"
 LOCAL_REGISTRY_NAME = "{{ env.STACK_NAME }}-registry"
 LOCAL_REGISTRY_PORT = "5010"
 INCLUSTER_REGISTRY_PORT = "4678"
@@ -90,4 +91,5 @@ MINIO_HELM_VERSION = "7.1.1"
     { task = "setup:k8s-cluster" },
     { task = "setup:local-registry" },
     { tasks = ["setup:metrics-server", "setup:minio-operator"] },
+    { tasks = ["setup:datalake"] },
   ]

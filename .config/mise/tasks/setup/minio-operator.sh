@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#MISE description="Sets up a MinIO Operator"
+#MISE description="Set up a MinIO Operator"
 #MISE depends=["check:kubecontext"]
 
 helm upgrade --repo https://operator.min.io operator operator \
