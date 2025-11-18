@@ -7,7 +7,8 @@ helm upgrade --repo https://kubernetes-sigs.github.io/metrics-server/ metrics-se
   --version 3.13.0 \
   --namespace kube-system \
   --install \
-  --atomic \
+  --rollback-on-failure \
+  --cleanup-on-fail \
   --values - <<EOF
 metrics:
   enabled: true

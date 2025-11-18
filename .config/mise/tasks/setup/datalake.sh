@@ -8,7 +8,8 @@ helm upgrade --repo https://operator.min.io tenant tenant \
   --namespace datalake \
   --create-namespace \
   --install \
-  --atomic \
+  --rollback-on-failure \
+  --cleanup-on-fail \
   --values - <<EOF
 tenant:
   name: minio-datalake

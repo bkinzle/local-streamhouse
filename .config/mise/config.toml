@@ -86,10 +86,12 @@ MINIO_HELM_VERSION = "7.1.1"
 
 [tasks.setup]
   description = "Sets up the entire local-first development environment"
-  depends = ["check:prerequisites"]
+  depends = ["check:prerequisites", "teardown"]
   run = [
     { task = "setup:k8s-cluster" },
     { task = "setup:local-registry" },
+    { task = "setup:cert-manager" },
+    { task = "setup:envoy-proxy-gateway" },
     { tasks = ["setup:metrics-server", "setup:minio-operator"] },
     { tasks = ["setup:datalake"] },
   ]

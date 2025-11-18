@@ -8,7 +8,8 @@ helm upgrade --repo https://operator.min.io operator operator \
   --namespace minio-operator \
   --create-namespace \
   --install \
-  --atomic \
+  --rollback-on-failure \
+  --cleanup-on-fail \
   --values - <<EOF
 operator:
   env:
