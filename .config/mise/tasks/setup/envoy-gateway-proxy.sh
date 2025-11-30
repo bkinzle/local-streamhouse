@@ -70,9 +70,15 @@ spec:
     - name: http
       protocol: HTTP
       port: 80
+      allowedRoutes:
+        namespaces:
+          from: All
     - name: https
       protocol: HTTPS
       port: 443
+      allowedRoutes:
+        namespaces:
+          from: All
       hostname: "*.${DNSMASQ_DOMAIN}"
       tls:
         mode: Terminate
@@ -80,3 +86,11 @@ spec:
           - name: wildcard-dnsmasq-domain-tls
             kind: Secret
 EOF
+
+# Step 5: Patch the nodePort values since we're unable to specify them directly right now
+kubectl wait --for=condition=Programmed gateway/envoy-gateway -n gateway-system --timeout=120s
+SERVICE_NAME=$(kubectl get svc -n gateway-system -l gateway.envoyproxy.io/owning-gateway-name=envoy-gateway -o jsonpath='{.items[0].metadata.name}')
+kubectl patch service "${SERVICE_NAME}" -n gateway-system --type=json -p='[
+  {"op": "replace", "path": "/spec/ports/0/nodePort", "value": 30000},
+  {"op": "replace", "path": "/spec/ports/1/nodePort", "value": 30001}
+]'

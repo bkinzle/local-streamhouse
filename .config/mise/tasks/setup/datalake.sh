@@ -25,13 +25,43 @@ tenant:
     - name: openobserve
   certificate:
     requestAutoCert: false
-# ingress:
-#   api:
-#     enabled: true
-#     ingressClassName: nginx
-#     host: datalake-api.${DNSMASQ_DOMAIN}
-#   console:
-#     enabled: true
-#     ingressClassName: nginx
-#     host: datalake.${DNSMASQ_DOMAIN}
+EOF
+
+kubectl apply -n datalake -f - <<EOF
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: datalake
+spec:
+  parentRefs:
+    - kind: Gateway
+      name: envoy-gateway
+      namespace: gateway-system
+      sectionName: https
+  hostnames:
+    - datalake.${DNSMASQ_DOMAIN}
+  rules:
+    - backendRefs:
+      - kind: Service
+        name: minio-datalake-console
+        port: 9090
+EOF
+
+kubectl apply -n datalake -f - <<EOF
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: datalake-api
+spec:
+  parentRefs:
+    - kind: Gateway
+      name: envoy-gateway
+      namespace: gateway-system
+  hostnames:
+    - datalake-api.${DNSMASQ_DOMAIN}
+  rules:
+    - backendRefs:
+      - kind: Service
+        name: minio
+        port: 80
 EOF
