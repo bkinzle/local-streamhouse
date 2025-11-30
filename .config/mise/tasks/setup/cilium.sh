@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+
+#MISE description="Install Cilium CNI as replacement for kube-proxy with Hubble UI enabled (for more parity with GKE's default CNI)"
+#MISE depends=["check:kubecontext"]
+
+helm upgrade --repo https://helm.cilium.io cilium cilium \
+  --version 1.19.0-pre.2 \
+  --namespace kube-system \
+  --install \
+  --rollback-on-failure \
+  --cleanup-on-fail \
+  --values - <<EOF
+kubeProxyReplacement: true
+k8sServiceHost: "${STACK_NAME}-control-plane"
+k8sServicePort: "6443"
+externalIPs:
+  enabled: true
+nodePort:
+  enabled: true
+hostPort:
+  enabled: true
+ipam:
+  mode: kubernetes
+hubble:
+  enabled: true
+  relay:
+    enabled: true
+  ui:
+    enabled: true
+EOF
+
+kubectl apply -n kube-system -f - <<EOF
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: hubble-ui
+spec:
+  parentRefs:
+    - kind: Gateway
+      name: envoy-gateway
+      namespace: gateway-system
+      sectionName: https
+  hostnames:
+    - hubble-ui.${DNSMASQ_DOMAIN}
+  rules:
+    - backendRefs:
+      - kind: Service
+        name: hubble-ui
+        port: 80
+EOF

@@ -2,6 +2,8 @@
 
 #MISE description="Sets up self-signed certificates for local development"
 
+project_name=$(basename "$MISE_PROJECT_ROOT")
+
 if [ -d ${MISE_PROJECT_ROOT}/.ssl ];
 then
   echo "Local certificates already exist, skipping"
@@ -12,9 +14,9 @@ else
   echo "Root certificate created"
 
   mkdir -p $(brew --prefix)/etc/ca-certificates/${DNSMASQ_DOMAIN}
-  cp ${MISE_PROJECT_ROOT}/.ssl/root-ca.pem $(brew --prefix)/etc/ca-certificates/${DNSMASQ_DOMAIN}/${MISE_PROJECT_ROOT}-ca.crt
+  cp ${MISE_PROJECT_ROOT}/.ssl/root-ca.pem $(brew --prefix)/etc/ca-certificates/${DNSMASQ_DOMAIN}/$project_name-ca.crt
   echo "Enter your mac's password and verify trusting to add this to keychain..."
-  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $(brew --prefix)/etc/ca-certificates/${DNSMASQ_DOMAIN}/${MISE_PROJECT_ROOT}-ca.crt
+  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $(brew --prefix)/etc/ca-certificates/${DNSMASQ_DOMAIN}/$project_name-ca.crt
 
   echo "Creating a Java Keystore with the CA Certificate imported..."
   cd ${MISE_PROJECT_ROOT}/.ssl

@@ -1,9 +1,22 @@
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
+networking:
+  disableDefaultCNI: true
+  kubeProxyMode: none
 containerdConfigPatches:
   - |
     [plugins."io.containerd.grpc.v1.cri".registry]
       config_path = "/etc/containerd/certs.d"
+kubeadmConfigPatches:
+  - |-
+    kind: ClusterConfiguration
+    apiServer:
+      extraVolumes:
+        - name: opt-ca-certificates
+          hostPath: /opt/ca-certificates/root-ca.pem
+          mountPath: /opt/ca-certificates/root-ca.pem
+          readOnly: true
+          pathType: File
 nodes:
   - role: control-plane
     image: "kindest/node:v$KUBERNETES_VERSION"
@@ -33,14 +46,19 @@ nodes:
         containerPath: "/etc/containerd/certs.d/"
         readOnly: true
     extraPortMappings:
-    # Port for the ingress controller over http
+    # Port for gateway over http
     - containerPort: 30000
       hostPort: 80
       listenAddress: "127.0.0.1"
       protocol: TCP
-    # Port for the ingress controller over https
+    # Port for gateway over https
     - containerPort: 30001
       hostPort: 443
+      listenAddress: "127.0.0.1"
+      protocol: TCP
+    # Port for gateway tcp for postgres
+    - containerPort: 30002
+      hostPort: 5432
       listenAddress: "127.0.0.1"
       protocol: TCP
   - role: worker
