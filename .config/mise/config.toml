@@ -27,6 +27,7 @@ LOCAL_REGISTRY_PORT = "5010"
 INCLUSTER_REGISTRY_PORT = "4678"
 KUBERNETES_VERSION = "1.34.0"
 MINIO_HELM_VERSION = "7.1.1"
+ENVOY_PROXY_GATEWAY_VERSION = "0.0.0-latest"
 
 # Task definitions
 [tasks."check:tool"]
@@ -46,7 +47,7 @@ MINIO_HELM_VERSION = "7.1.1"
 [tasks."check:prerequisites"]
   description = "Checks for all prerequisite tools"
   run = '''
-  tools=("envsubst" "docker" "kind" "kubectl" "helm")
+  tools=("openssl" "keytool" "envsubst" "docker" "kind" "kubectl" "helm")
   for tool in "${tools[@]}"; do
     mise run check:tool "$tool"
   done
@@ -86,12 +87,13 @@ MINIO_HELM_VERSION = "7.1.1"
 
 [tasks.setup]
   description = "Sets up the entire local-first development environment"
-  depends = ["check:prerequisites", "teardown"]
+  depends = ["check:prerequisites"]
   run = [
+    { task = "setup:self-signed-certificates" },
     { task = "setup:k8s-cluster" },
     { task = "setup:local-registry" },
     { task = "setup:cert-manager" },
-    { task = "setup:envoy-proxy-gateway" },
+    { task = "setup:envoy-gateway-proxy" },
     { tasks = ["setup:metrics-server", "setup:minio-operator"] },
     { tasks = ["setup:datalake"] },
   ]

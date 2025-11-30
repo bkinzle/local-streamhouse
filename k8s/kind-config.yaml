@@ -8,6 +8,12 @@ nodes:
   - role: control-plane
     image: "kindest/node:v$KUBERNETES_VERSION"
     extraMounts:
+      - hostPath: $PWD/.ssl/root-ca.pem
+        containerPath: /opt/ca-certificates/root-ca.pem
+        readOnly: true
+      - hostPath: $PWD/.ssl/truststore.jks
+        containerPath: /opt/ca-certificates/truststore.jks
+        readOnly: true
       - hostPath: $PWD/k8s/.local-registry/
         containerPath: "/etc/containerd/certs.d/"
         readOnly: true
@@ -17,6 +23,12 @@ nodes:
       ingress-ready: "true"
     image: "kindest/node:v$KUBERNETES_VERSION"
     extraMounts:
+      - hostPath: $PWD/.ssl/root-ca.pem
+        containerPath: /opt/ca-certificates/root-ca.pem
+        readOnly: true
+      - hostPath: $PWD/.ssl/truststore.jks
+        containerPath: /opt/ca-certificates/truststore.jks
+        readOnly: true
       - hostPath: $PWD/k8s/.local-registry/
         containerPath: "/etc/containerd/certs.d/"
         readOnly: true
@@ -37,6 +49,12 @@ nodes:
       ingress-ready: "false"
     image: "kindest/node:v$KUBERNETES_VERSION"
     extraMounts:
+      - hostPath: $PWD/.ssl/root-ca.pem
+        containerPath: /opt/ca-certificates/root-ca.pem
+        readOnly: true
+      - hostPath: $PWD/.ssl/truststore.jks
+        containerPath: /opt/ca-certificates/truststore.jks
+        readOnly: true
       - hostPath: $PWD/k8s/.local-registry/
         containerPath: "/etc/containerd/certs.d/"
         readOnly: true
@@ -46,6 +64,12 @@ nodes:
       ingress-ready: "false"
     image: "kindest/node:v$KUBERNETES_VERSION"
     extraMounts:
+      - hostPath: $PWD/.ssl/root-ca.pem
+        containerPath: /opt/ca-certificates/root-ca.pem
+        readOnly: true
+      - hostPath: $PWD/.ssl/truststore.jks
+        containerPath: /opt/ca-certificates/truststore.jks
+        readOnly: true
       - hostPath: $PWD/k8s/.local-registry/
         containerPath: "/etc/containerd/certs.d/"
         readOnly: true
