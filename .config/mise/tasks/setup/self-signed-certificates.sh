@@ -12,9 +12,9 @@ else
   echo "Root certificate created"
 
   mkdir -p $(brew --prefix)/etc/ca-certificates/${DNSMASQ_DOMAIN}
-  cp ${MISE_PROJECT_ROOT}/.ssl/root-ca.pem $(brew --prefix)/etc/ca-certificates/${DNSMASQ_DOMAIN}/local-o11y-stack-ca.crt
+  cp ${MISE_PROJECT_ROOT}/.ssl/root-ca.pem $(brew --prefix)/etc/ca-certificates/${DNSMASQ_DOMAIN}/${MISE_PROJECT_ROOT}-ca.crt
   echo "Enter your mac's password and verify trusting to add this to keychain..."
-  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $(brew --prefix)/etc/ca-certificates/${DNSMASQ_DOMAIN}/local-o11y-stack-ca.crt
+  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $(brew --prefix)/etc/ca-certificates/${DNSMASQ_DOMAIN}/${MISE_PROJECT_ROOT}-ca.crt
 
   echo "Creating a Java Keystore with the CA Certificate imported..."
   cd ${MISE_PROJECT_ROOT}/.ssl
