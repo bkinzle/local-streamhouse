@@ -85,6 +85,13 @@ ENVOY_PROXY_GATEWAY_VERSION = "0.0.0-latest"
   docker rm -f ${LOCAL_REGISTRY_NAME} &>/dev/null || true
   '''
 
+[tasks."teardown:self-signed-certificates"]
+  description = "Tears down the local self-signed certificates"
+  run = '''
+  rm -rf .ssl || true
+  sudo security delete-certificate -c "kube-ca"
+  '''
+
 [tasks.setup]
   description = "Sets up the entire local-first development environment"
   depends = ["check:prerequisites"]
