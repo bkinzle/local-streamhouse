@@ -4,7 +4,7 @@
 #MISE depends=["check:kubecontext"]
 
 helm upgrade --repo https://helm.cilium.io cilium cilium \
-  --version 1.19.0-pre.2 \
+  --version 1.19.0-pre.3 \
   --namespace kube-system \
   --install \
   --rollback-on-failure \
@@ -29,22 +29,4 @@ hubble:
     enabled: true
 EOF
 
-kubectl apply -n kube-system -f - <<EOF
-apiVersion: gateway.networking.k8s.io/v1
-kind: HTTPRoute
-metadata:
-  name: hubble-ui
-spec:
-  parentRefs:
-    - kind: Gateway
-      name: envoy-gateway
-      namespace: gateway-system
-      sectionName: https
-  hostnames:
-    - hubble-ui.${DNSMASQ_DOMAIN}
-  rules:
-    - backendRefs:
-      - kind: Service
-        name: hubble-ui
-        port: 80
-EOF
+# Moved creation of hubble-ui route to a later task after the Gateway API CRDs are installed

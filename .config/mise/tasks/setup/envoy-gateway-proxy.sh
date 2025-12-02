@@ -94,3 +94,24 @@ kubectl patch service "${SERVICE_NAME}" -n gateway-system --type=json -p='[
   {"op": "replace", "path": "/spec/ports/0/nodePort", "value": 30000},
   {"op": "replace", "path": "/spec/ports/1/nodePort", "value": 30001}
 ]'
+
+# See cilium.sh for comment about Hubble UI route creation timing
+kubectl apply -n kube-system -f - <<EOF
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: hubble-ui
+spec:
+  parentRefs:
+    - kind: Gateway
+      name: envoy-gateway
+      namespace: gateway-system
+      sectionName: https
+  hostnames:
+    - hubble-ui.${DNSMASQ_DOMAIN}
+  rules:
+    - backendRefs:
+      - kind: Service
+        name: hubble-ui
+        port: 80
+EOF

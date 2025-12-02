@@ -26,8 +26,9 @@ LOCAL_REGISTRY_NAME = "{{ env.STACK_NAME }}-registry"
 LOCAL_REGISTRY_PORT = "5010"
 INCLUSTER_REGISTRY_PORT = "4678"
 KUBERNETES_VERSION = "1.34.0"
-MINIO_HELM_VERSION = "7.1.1"
 ENVOY_PROXY_GATEWAY_VERSION = "0.0.0-latest"
+MINIO_HELM_VERSION = "7.1.1"
+POSTGRES_IMAGE = "ghcr.io/cloudnative-pg/postgresql:18.1-202512010807-system-trixie@sha256:cdc4ea1525e5214df62dfdf4376cc50bbb55bc1f2ccd9465ad6692996e08518d"
 
 # Task definitions
 [tasks."check:tool"]
@@ -102,5 +103,5 @@ ENVOY_PROXY_GATEWAY_VERSION = "0.0.0-latest"
     { task = "setup:cert-manager" },
     { task = "setup:envoy-gateway-proxy" },
     { tasks = ["setup:metrics-server", "setup:minio-operator"] },
-    { tasks = ["setup:datalake"] },
+    { tasks = ["setup:datalake", "setup:postgres"] },
   ]

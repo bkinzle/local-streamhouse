@@ -1,0 +1,116 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: pgadmin4-server-connections
+stringData:
+  servers.json: |
+    {
+        "Servers": {
+            "1": {
+                "Name": "${STACK_NAME}-rw",
+                "Group": "Local K8s HA Cluster",
+                "Port": 5432,
+                "Username": "${PG_USERNAME}",
+                "Host": "${STACK_NAME}-rw",
+                "SSLMode": "prefer",
+                "MaintenanceDB": "postgres",
+                "ConnectionParameters": {
+                    "sslmode": "prefer",
+                    "connect_timeout": 10,
+                    "passfile": "/var/lib/pgadmin/storage/pgadmin4_pgadmin.org/pgpass"
+                }
+            }
+        }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/name: pgadmin4
+  name: pgadmin4
+  namespace: postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: pgadmin4
+  template:
+    metadata:
+      labels:
+        app: pgadmin4
+    spec:
+      containers:
+      - image: dpage/pgadmin4:latest
+        name: pgadmin4
+        securityContext:
+          runAsUser: 0
+        command: ["/bin/sh","-c","mkdir -p /var/lib/pgadmin/storage/pgadmin4_pgadmin.org;
+                  cp /etc/secret-volume/pgpass /var/lib/pgadmin/storage/pgadmin4_pgadmin.org/pgpass;
+                  chmod 600 /var/lib/pgadmin/storage/pgadmin4_pgadmin.org/pgpass;
+                  /entrypoint.sh;
+                  "]
+        env:
+        - name: PGADMIN_DEFAULT_EMAIL
+          value: "pgadmin4@pgadmin.org"
+        - name: PGADMIN_DEFAULT_PASSWORD
+          value: "weak"
+        - name: PGADMIN_CONFIG_SERVER_MODE
+          value: "False"
+        - name: PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED
+          value: "False"
+        - name: PGADMIN_SERVER_JSON_FILE
+          value: "/etc/server-connections/servers.json"
+        volumeMounts:
+          - name: secret-volume
+            readOnly: true
+            mountPath: "/etc/secret-volume"
+          - name: server-connections
+            readOnly: true
+            mountPath: "/etc/server-connections"
+      volumes:
+        - name: secret-volume
+          secret:
+            secretName: ${STACK_NAME}-superuser
+            defaultMode: 0600
+        - name: server-connections
+          secret:
+            secretName: pgadmin4-server-connections
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/name: pgadmin4
+  name: pgadmin4
+  namespace: postgres
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: pgadmin4
+  type: ClusterIP
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: pgadmin4
+  namespace: postgres
+  labels:
+    app.kubernetes.io/name: pgadmin4
+spec:
+  parentRefs:
+    - kind: Gateway
+      name: envoy-gateway
+      namespace: gateway-system
+      sectionName: https
+  hostnames:
+    - pgadmin4.${DNSMASQ_DOMAIN}
+  rules:
+    - backendRefs:
+      - kind: Service
+        name: pgadmin4
+        port: 80

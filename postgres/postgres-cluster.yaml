@@ -1,0 +1,33 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: $STACK_NAME
+spec:
+  description: "Relational database for $STACK_NAME."
+  imageName: $POSTGRES_IMAGE
+  instances: 3
+
+  primaryUpdateStrategy: unsupervised
+
+  postgresql:
+    parameters:
+      shared_buffers: 256MB
+      pg_stat_statements.max: '10000'
+      pg_stat_statements.track: all
+      auto_explain.log_min_duration: '10s'
+      pgaudit.log: 'all, -misc'
+      pgaudit.log_catalog: 'off'
+      pgaudit.log_parameter: 'on'
+      pgaudit.log_relation: 'on'
+      pgaudit.log_client: 'on'
+
+  bootstrap:
+    initdb:
+      database: operational_datastore
+      owner: operational_datastore
+
+  enableSuperuserAccess: true
+
+  storage:
+    storageClass: standard
+    size: 1Gi
