@@ -31,3 +31,29 @@ spec:
   storage:
     storageClass: standard
     size: 1Gi
+  
+  managed:
+    roles:
+      - name: catalog_admin
+        login: true
+        passwordSecret:
+          name: $STACK_NAME-catalog-admin
+        createdb: true
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: $STACK_NAME-catalog-admin
+type: Opaque
+data:
+  password: aVdpbGxOZXZlclRlbGw=
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: iceberg-catalog
+spec:
+  cluster:
+    name: $STACK_NAME
+  name: iceberg_catalog
+  owner: catalog_admin

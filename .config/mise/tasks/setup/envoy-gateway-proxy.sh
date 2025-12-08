@@ -32,11 +32,13 @@ spec:
     type: Kubernetes
     kubernetes:
       envoyDeployment:
+        name: envoy-proxy
         replicas: 3
         pod:
           nodeSelector:
             ingress-ready: "true"
       envoyService:
+        name: envoy-proxy
         externalTrafficPolicy: Local
         type: NodePort
 EOF

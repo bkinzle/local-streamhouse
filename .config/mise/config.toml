@@ -90,7 +90,7 @@ POSTGRES_IMAGE = "ghcr.io/cloudnative-pg/postgresql:18.1-202512010807-system-tri
   description = "Tears down the local self-signed certificates"
   run = '''
   rm -rf .ssl || true
-  sudo security delete-certificate -c "kube-ca"
+  sudo security delete-certificate -c "${STACK_NAME}-kube-ca"
   '''
 
 [tasks.setup]
@@ -104,4 +104,5 @@ POSTGRES_IMAGE = "ghcr.io/cloudnative-pg/postgresql:18.1-202512010807-system-tri
     { task = "setup:envoy-gateway-proxy" },
     { tasks = ["setup:metrics-server", "setup:minio-operator"] },
     { tasks = ["setup:datalake", "setup:postgres"] },
+    { tasks = ["setup:observability-platform"] },
   ]
