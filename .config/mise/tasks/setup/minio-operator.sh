@@ -18,5 +18,5 @@ operator:
     - name: OPERATOR_STS_ENABLED
       value: "on"
     - name: WATCHED_NAMESPACE
-      value: "datalake"
+      value: "streamhouse"
 EOF

@@ -5,7 +5,7 @@
 
 helm upgrade --repo https://operator.min.io tenant tenant \
   --version ${MINIO_HELM_VERSION} \
-  --namespace datalake \
+  --namespace streamhouse \
   --create-namespace \
   --install \
   --rollback-on-failure \
@@ -27,7 +27,7 @@ tenant:
     requestAutoCert: false
 EOF
 
-kubectl apply -n datalake -f - <<EOF
+kubectl apply -n streamhouse -f - <<EOF
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
@@ -47,7 +47,7 @@ spec:
         port: 9090
 EOF
 
-kubectl apply -n datalake -f - <<EOF
+kubectl apply -n streamhouse -f - <<EOF
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:

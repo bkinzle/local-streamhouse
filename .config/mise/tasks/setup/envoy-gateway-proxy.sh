@@ -87,6 +87,14 @@ spec:
         certificateRefs:
           - name: wildcard-dnsmasq-domain-tls
             kind: Secret
+    - name: postgres
+      protocol: TCP
+      port: 5432
+      allowedRoutes:
+        kinds:
+          - kind: TCPRoute
+        namespaces:
+          from: All
 EOF
 
 # Step 5: Patch the nodePort values since we're unable to specify them directly right now
@@ -94,7 +102,8 @@ kubectl wait --for=condition=Programmed gateway/envoy-gateway -n gateway-system 
 SERVICE_NAME=$(kubectl get svc -n gateway-system -l gateway.envoyproxy.io/owning-gateway-name=envoy-gateway -o jsonpath='{.items[0].metadata.name}')
 kubectl patch service "${SERVICE_NAME}" -n gateway-system --type=json -p='[
   {"op": "replace", "path": "/spec/ports/0/nodePort", "value": 30000},
-  {"op": "replace", "path": "/spec/ports/1/nodePort", "value": 30001}
+  {"op": "replace", "path": "/spec/ports/1/nodePort", "value": 30001},
+  {"op": "replace", "path": "/spec/ports/2/nodePort", "value": 30002}
 ]'
 
 # See cilium.sh for comment about Hubble UI route creation timing

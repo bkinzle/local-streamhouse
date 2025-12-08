@@ -16,7 +16,7 @@ auth:
   ZO_S3_ACCESS_KEY: "minio"
   ZO_S3_SECRET_KEY: "minio123"
 config:
-  ZO_S3_SERVER_URL: http://minio.datalake.svc
+  ZO_S3_SERVER_URL: http://minio.streamhouse.svc
   ZO_S3_BUCKET_NAME: openobserve
   ZO_S3_REGION_NAME: us-east-1
   ZO_S3_PROVIDER: minio

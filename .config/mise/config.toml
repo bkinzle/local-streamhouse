@@ -20,7 +20,7 @@ min_version = "2025.11.3"
 
 # Environment variables
 [env]
-STACK_NAME = "local-o11y"
+STACK_NAME = "streamhouse"
 DNSMASQ_DOMAIN = "localtest.me"
 LOCAL_REGISTRY_NAME = "{{ env.STACK_NAME }}-registry"
 LOCAL_REGISTRY_PORT = "5010"
@@ -28,7 +28,8 @@ INCLUSTER_REGISTRY_PORT = "4678"
 KUBERNETES_VERSION = "1.34.0"
 ENVOY_PROXY_GATEWAY_VERSION = "0.0.0-latest"
 MINIO_HELM_VERSION = "7.1.1"
-POSTGRES_IMAGE = "ghcr.io/cloudnative-pg/postgresql:18.1-202512010807-system-trixie@sha256:cdc4ea1525e5214df62dfdf4376cc50bbb55bc1f2ccd9465ad6692996e08518d"
+POSTGRES_IMAGE = "ghcr.io/cloudnative-pg/postgresql:18.1-202512080807-system-trixie@sha256:717ef0dedc5d5825e1f5014d867ed7d46def6d367239b253864af882fc9f0b1b"
+PG_CLUSTER_NAME = "{{ env.STACK_NAME }}-relational-db"
 
 # Task definitions
 [tasks."check:tool"]
@@ -103,6 +104,6 @@ POSTGRES_IMAGE = "ghcr.io/cloudnative-pg/postgresql:18.1-202512010807-system-tri
     { task = "setup:cert-manager" },
     { task = "setup:envoy-gateway-proxy" },
     { tasks = ["setup:metrics-server", "setup:minio-operator"] },
-    { tasks = ["setup:datalake", "setup:postgres"] },
-    { tasks = ["setup:observability-platform"] },
+    { tasks = ["setup:streamhouse-object-store", "setup:postgres-control-plane"] },
+    { tasks = ["setup:observability-platform", "setup:streamhouse-relational-db"] },
   ]
