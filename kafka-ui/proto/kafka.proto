@@ -1,0 +1,266 @@
+syntax = "proto3";
+
+import "reports.proto";
+import "google/protobuf/timestamp.proto";
+
+package mdg.engine.proto;
+
+message ReportKafkaKey {
+  string service_id = 1;
+  google.protobuf.Timestamp ends_at = 2;
+  reserved 3; // uint64 id = 3, presumably used for Bigtable keys
+}
+
+// The stream processor will get access to the Kafka key and value as ByteArrays. To allow it to spread the load
+// properly and without deserializing the entire kafka value, we include all the important data in the key. The
+// timestamp here is the received time when the data is ingested so that the kafka data gets spread across all partition
+// equally. Later within the stream processing pipeline, the timestamp changes to be the report end time truncated to
+// the minute so that we can group together all reports for the same graph and minute.
+message ReportStreamKafkaKey {
+  google.protobuf.Timestamp timestamp = 1;
+  string graph_id = 2;
+  string graph_variant = 3;
+  bool to_ignore = 4;
+}
+
+message ContextualizedEnumValueStats {
+  StatsContext context = 1;
+  map<string, EnumStats> enum_names = 2;
+}
+
+message ContextualizedInputObjectFieldStats {
+  StatsContext context = 1;
+  map<string, InputTypeStats> input_types = 2;
+}
+
+message QueryStats {
+  QueryMetadata query_metadata = 11;
+
+  // XXX It would be more efficient to merge these four contextualized
+  // types into one, instead of having the StatsContext repeated four
+  // times. It would also simplify the code (eg in the DSFieldUsage
+  // ingester where query and type stats are iterated over next to
+  // each other.)
+  repeated ContextualizedQueryLatencyStats query_stats_with_context = 4;
+  repeated ContextualizedTypeStats type_stats_with_context = 5;
+  repeated ContextualizedEnumValueStats enum_stats_with_context = 9;
+  repeated ContextualizedInputObjectFieldStats input_type_stats_with_context = 10;
+  map<string, ReferencedFieldsForType> referenced_fields_by_type = 8;
+
+  reserved 1, 2, 3, 6, 7;
+}
+
+// This message is stored in `engine-stats` topic in kafka
+// Its shape is based of the original engine proxy stats report
+message StatsReport {
+  ReportHeader header = 1; // required
+
+  // Beginning of the period over which stats are collected.
+  // Custom Variation: commented out the start_time field and made it reserved
+  // google.protobuf.Timestamp start_time = 8;
+  // End of the period of which stats are collected.
+  google.protobuf.Timestamp end_time = 9;
+
+  bool extended_refs_enabled = 15;
+
+  // Maps from query descriptor to QueryStats. The keys are an operation ID, and we expect the QueryMetadata field in
+  // QueryStats to be populated with the operation name, and optionally an operation signature. The signature will be
+  // blank if we know for sure that it has already been stored in Spanner, which means we don't need to store it again.
+  map<string, QueryStats> per_query = 14;
+
+  // New field that populated by the stream processor which is specifically for the field_executions and field_latencies
+  // datasources. This contains coordinate data that does not include operation or context details.
+  SchemaCoordinateData schema_coordinate_data = 16;
+
+  reserved 2, 3, 4, 5, 6, 7, 8, 10, 11, 12, 13;
+}
+
+// This messages is stored in `engine-traces`
+// Stores a set of traces
+message TracesReport {
+  ReportHeader header = 1; // required
+  repeated Trace trace = 2; // required
+}
+
+
+message StatsKafkaValue {
+  string internal_account_id = 1;
+  google.protobuf.Timestamp received_at = 2;
+  StatsReport report = 3;
+  string service_id = 4;
+  bool from_engineproxy = 5;
+
+  // A list of datasources that should skip ingestion
+  repeated string disabled_data_sources = 7;
+
+  bool field_usage_enabled = 8; // If this is false, Flink should only process input object fields and enum values, not object fields
+
+  // New field that populated by the stream processor which is specifically for the ingestion_metadata datasource
+  IngestionMetadata ingestion_metadata = 9;
+
+  reserved 6; // bool optimized_field_ingestion = 6; (temporary flag to try out a new ingestion method for specific graphs only)
+}
+
+// These are used in the ingestion metadata datasource, and it contains an aggregation of all reports for a graphref
+message IngestionMetadata {
+  uint64 report_count = 1;
+  uint64 query_count = 2;
+  uint64 num_bytes = 3;
+}
+
+// This is a slimmed down version of QueryLatencyStats containing only the
+// fields that we forward to Datadog.
+message DatadogQueryLatencyStats {
+  // List is serialized DurationHistogram
+  repeated int64 uncached_latency_histogram = 1;
+  uint64 request_count = 2;
+  uint64 cache_hit_count = 3;
+  uint64 request_with_errors_count = 4;
+}
+
+// This contains the stats that we forward to Datadog for a specific variant of
+// a schema.
+message DatadogVariantStats {
+  // Map key is operation name.
+  map<string, DatadogQueryLatencyStats> stats_per_operation = 1;
+}
+
+// This is for internal topics in the Datadog forwarder, namely the repartition
+// topic and the window store changelog topic.
+message DatadogStatsKafkaValue {
+  // Map key is variant name (also called the schema tag).
+  map<string, DatadogVariantStats> stats_per_variant = 1;
+}
+
+// Reports indicating  "processed" traces on after they have already been uploaded to GCS.
+// Contain all the information need to ingest in DSTraceRefs & DSTracePathErrorsRefs.
+message ProcessedTraceInfo {
+  // Compression information
+  uint64 size = 3; // The size, in bytes, of the trace as stored in its associated compressed GCS record
+  // Storage location and key information
+  string report_id_base_16 = 5;
+  google.protobuf.Timestamp trace_end_time = 7;
+  // e.g. mdg-engine-traces-4/prod/y=2018/m=03/d=02/engine-prod/foobarcarhardyhar?offset=4935&size=5234
+  string complete_trace_key = 8;
+  string client_name = 9;
+  string client_version = 18;
+  string operation_type = 26;
+  string operation_subtype = 27;
+  uint64 duration_bucket = 10;
+  uint64 duration_ns = 11;
+  string query_name = 12;
+  string query_id = 13;
+  string query_signature = 14;
+  string service_id = 15;
+  string service_version = 16;
+  string graph_variant = 24;
+  string schema_hash = 25;
+  uint32 http_status_code = 19;
+  google.protobuf.Timestamp start_time = 20;
+  repeated PathInfo pathInfo = 21;
+  uint64 errors_count = 22;
+
+  reserved 2, 4, 6, 17;
+
+  message PathInfo {
+    string path = 1;
+    uint64 errors_count = 2;
+    repeated Error error = 3;
+    message Error {
+      string message = 1;
+    }
+  }
+}
+
+message ProcessedTracesInfoReport {
+  // The header information is forwarded from the traces report, and may be empty.
+  // More particularly, the `service` value embedded within the header key is not guaranteed
+  // to contain an actual service, and the service information is trusted to come upstream
+  // and be embedded in the [ReportKafkaKey]. The other information (hostname, agent_version,
+  // etc.) is sent by the Apollo Engine Reporting agent, but we do not currently save that
+  // information anywhere other than Kafka.
+  ReportHeader header = 1;
+  repeated ProcessedTraceInfo processedTraceInfo = 2;
+}
+// Indicates the format of the trace payload in EngineTracesKafkaValue.trace_bytes.
+enum TraceFormat {
+  // Parse as an Apollo Reports.Trace message
+  APOLLO_REPORTS_TRACE = 0;
+  // Parse as an OTel trace v1
+  // https://github.com/open-telemetry/opentelemetry-proto/blob/main/opentelemetry/proto/trace/v1/trace.proto
+  OTEL_TRACE_V1 = 1;
+}
+
+message EngineTracesKafkaKey {
+  string graph_id = 1;
+  string graph_variant = 2;
+
+  // Setting ourselves up for the future where this hash represents the uniqueness of trace errors
+  // meaning, if we've seen this unique value before, then we drop the trace.
+  string error_key = 3;
+
+  string query_id = 4;
+
+  // the id (index [0, 383]) of the latency bucket for this trace
+  uint32 stats_bucket_id = 5; // so that we could filter w/o parsing the trace
+
+  // The timestamp for this trace, floored to the minute
+  google.protobuf.Timestamp ends_at_minute_floor = 6;
+
+  string operation_type = 7;
+  string operation_subtype = 8;
+
+  // Currently either APOLLO or OTEL.  Used to determine how to parse the
+  // EngineTracesKafkaValue.trace_bytes field.
+  TraceFormat trace_format = 9;
+}
+
+message EngineTracesKafkaValue {
+
+  // bytes of ReportHeader
+  bytes report_header_bytes = 1;
+
+  // bytes of Trace
+  bytes trace_bytes = 2;
+}
+
+message BillingUsageStatsValue {
+  // Random value generated by engine-reports that our billing system can use to de-dup
+  // Kafka messages. (Don't let customers set this or else they can make our billing system
+  // not charge them!)
+  string report_uuid = 1;
+  string internal_account_id = 2;
+  google.protobuf.Timestamp end_time = 3;
+  string graph_id = 4;
+  string graph_variant = 5;
+  string operation_type = 10;
+  string operation_subtype = 11;
+  uint64 operation_count = 6;
+  bool operation_count_provided_explicitly = 7;
+  bool from_cloud_router = 9;
+
+  // In order to debug some strange numbers we're seeing, we want to be able to tell
+  // what version of Apollo Server or Router sent a report. We might remove this later.
+  string agent_version = 8;
+}
+
+message SchemaCoordinateData {
+  // Map of parent type to a collection of data for each field name within
+  map<string, SchemaCoordinateParentTypeData> parent_types = 1;
+}
+
+message SchemaCoordinateParentTypeData {
+  // Map of field name to latency data
+  map<string, SchemaCoordinateFieldNameData> field_names = 1;
+}
+
+message SchemaCoordinateFieldNameData {
+  uint64 observed_execution_count = 2;
+  uint64 estimated_execution_count = 3;
+  uint64 referencing_operation_count = 4;
+  uint64 error_count = 5;
+  uint64 requests_with_error_count = 6;
+
+  // Duration histogram for the latency of this field
+  repeated sint64 latency_count = 1 [(js_use_toArray) = true];
+}

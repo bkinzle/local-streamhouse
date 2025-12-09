@@ -30,6 +30,9 @@ ENVOY_PROXY_GATEWAY_VERSION = "0.0.0-latest"
 MINIO_HELM_VERSION = "7.1.1"
 POSTGRES_IMAGE = "ghcr.io/cloudnative-pg/postgresql:18.1-202512080807-system-trixie@sha256:717ef0dedc5d5825e1f5014d867ed7d46def6d367239b253864af882fc9f0b1b"
 PG_CLUSTER_NAME = "{{ env.STACK_NAME }}-relational-db"
+STRIMZI_VERSION = "0.49.1"
+KAFKA_VERSION = "4.1.1"
+KAFKA_MINOR_VERSION = "4.1"
 
 # Task definitions
 [tasks."check:tool"]
@@ -49,7 +52,7 @@ PG_CLUSTER_NAME = "{{ env.STACK_NAME }}-relational-db"
 [tasks."check:prerequisites"]
   description = "Checks for all prerequisite tools"
   run = '''
-  tools=("openssl" "keytool" "envsubst" "docker" "kind" "kubectl" "helm")
+  tools=("openssl" "keytool" "envsubst" "docker" "kind" "kubectl" "helm" "gh")
   for tool in "${tools[@]}"; do
     mise run check:tool "$tool"
   done
@@ -103,7 +106,8 @@ PG_CLUSTER_NAME = "{{ env.STACK_NAME }}-relational-db"
     { tasks = ["setup:local-registry", "setup:cilium"] },
     { task = "setup:cert-manager" },
     { task = "setup:envoy-gateway-proxy" },
-    { tasks = ["setup:metrics-server", "setup:minio-operator"] },
-    { tasks = ["setup:streamhouse-object-store", "setup:postgres-control-plane"] },
-    { tasks = ["setup:observability-platform", "setup:streamhouse-relational-db"] },
+    { tasks = ["setup:metrics-server", "setup:minio-operator", "setup:postgres-control-plane", "setup:kafka-control-plane"] },
+    { tasks = ["setup:streamhouse-object-store"] },
+    { tasks = ["setup:kafka-cluster", "setup:kafka-topics"] },
+    { tasks = ["setup:observability-platform", "setup:streamhouse-relational-db", "setup:kafka-schema-registry", "setup:kafka-ui"] },
   ]

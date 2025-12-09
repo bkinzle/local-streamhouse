@@ -13,6 +13,16 @@ helm upgrade --repo https://charts.openobserve.ai openobserve openobserve \
   --cleanup-on-fail \
   --timeout 10m0s \
   --values - <<EOF
+replicaCount:
+  ingester: 2
+  querier: 2
+  router: 1
+  alertmanager: 1
+  alertquerier: 0
+  compactor: 2
+  zplane: 0
+  reportserver: 0
+  actions: 1
 auth:
   ZO_S3_ACCESS_KEY: "minio"
   ZO_S3_SECRET_KEY: "minio123"
