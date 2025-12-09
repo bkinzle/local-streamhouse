@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 #MISE description="Set up cloud-native postgres operator and Atlas operator for declarative database schema management"
 #MISE depends=["check:kubecontext"]

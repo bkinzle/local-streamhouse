@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 #MISE description="Sets up a Kubernetes Metrics Server"
 #MISE depends=["check:kubecontext"]

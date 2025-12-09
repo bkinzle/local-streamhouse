@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 #MISE description="Set up the OpenObserve platform (an open source Datadog alternative) and OpenTelemetry Collectors"
 #MISE depends=["check:kubecontext"]

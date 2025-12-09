@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 #MISE description="Set up cert-manager, create a Secret for root CA, and a ClusterIssuer from the secret"
 #MISE depends=["check:kubecontext"]

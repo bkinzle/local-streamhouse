@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 #MISE description="Set up a HA PostgreSQL cluster and a database schema and pgadmin4 preconfigured to connect"
 #MISE depends=["check:kubecontext"]

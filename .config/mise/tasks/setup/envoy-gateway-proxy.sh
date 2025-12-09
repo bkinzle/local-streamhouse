@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 #MISE description="Set up an envoy proxy gateway for ingress"
 #MISE depends=["check:kubecontext"]

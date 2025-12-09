@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 #MISE description="Set up a local oci artifact registry"
 #MISE depends=["check:kubecontext"]

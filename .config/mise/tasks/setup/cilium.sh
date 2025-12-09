@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 #MISE description="Install Cilium CNI as replacement for kube-proxy with Hubble UI enabled (for more parity with GKE's default CNI)"
 #MISE depends=["check:kubecontext"]

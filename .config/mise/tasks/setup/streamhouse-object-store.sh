@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 #MISE description="Set up an object store datalake implemented with a MinIO Tenant"
 #MISE depends=["check:kubecontext"]
