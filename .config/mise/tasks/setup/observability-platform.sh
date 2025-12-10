@@ -75,7 +75,7 @@ EOF
 
 # OTel Collector for K8s nodes/kublet metrics and logs
 helm upgrade --repo https://open-telemetry.github.io/opentelemetry-helm-charts otel-collector-k8s-nodes opentelemetry-collector \
-  --version 0.141.0 \
+  --version ${OPENTELEMETRY_OPERATOR_VERSION} \
   --namespace observability-platform \
   --install \
   --values - <<EOF
@@ -128,7 +128,7 @@ EOF
 
 # OTel Collector for K8s cluster as a whole and events from the k8s API server
 helm upgrade --repo https://open-telemetry.github.io/opentelemetry-helm-charts otel-collector-k8s-cluster opentelemetry-collector \
-  --version 0.141.0 \
+  --version ${OPENTELEMETRY_OPERATOR_VERSION} \
   --namespace observability-platform \
   --install \
   --values - <<EOF

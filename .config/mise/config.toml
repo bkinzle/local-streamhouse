@@ -33,6 +33,7 @@ PG_CLUSTER_NAME = "{{ env.STACK_NAME }}-relational-db"
 STRIMZI_VERSION = "0.49.1"
 KAFKA_VERSION = "4.1.1"
 KAFKA_MINOR_VERSION = "4.1"
+OPENTELEMETRY_OPERATOR_VERSION = "0.141.1"
 
 # Task definitions
 [tasks."check:tool"]
