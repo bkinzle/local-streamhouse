@@ -7,7 +7,6 @@ set -euo pipefail
 helm upgrade --repo https://operator.min.io tenant tenant \
   --version ${MINIO_HELM_VERSION} \
   --namespace streamhouse \
-  --create-namespace \
   --install \
   --rollback-on-failure \
   --cleanup-on-fail \

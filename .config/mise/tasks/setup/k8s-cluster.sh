@@ -3,6 +3,7 @@ set -euo pipefail
 
 #MISE description="Sets up a local kind kubernetes cluster"
 
+
 mkdir -p "k8s/.local-registry/localhost:${LOCAL_REGISTRY_PORT}" "k8s/.local-registry/${LOCAL_REGISTRY_NAME}:${INCLUSTER_REGISTRY_PORT}"
 
 cat <<EOF > "k8s/.local-registry/localhost:${LOCAL_REGISTRY_PORT}/hosts.toml"
@@ -20,4 +21,10 @@ EOF
 
 mkdir -p k8s/.cluster-config
 envsubst < ./k8s/kind-config.yaml > k8s/.cluster-config/kind-config.yaml
-kind create cluster --name ${STACK_NAME} --config k8s/.cluster-config/kind-config.yaml
+
+# Only create cluster if it doesn't already exist
+if ! kind get clusters | grep -q "^${STACK_NAME}$"; then
+  kind create cluster --name ${STACK_NAME} --config k8s/.cluster-config/kind-config.yaml
+else
+  echo "kind cluster '${STACK_NAME}' already exists, skipping creation..."
+fi

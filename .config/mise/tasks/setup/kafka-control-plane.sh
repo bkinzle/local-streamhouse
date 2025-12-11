@@ -9,6 +9,9 @@ kubectl apply --namespace kube-system --server-side -f <(
   gh release download --repo strimzi/strimzi-kafka-operator --pattern 'strimzi-crds-*.yaml' ${STRIMZI_VERSION} -O -
 )
 
+# Create the namespace streamhouse
+kubectl describe ns streamhouse &>/dev/null || kubectl create ns streamhouse
+
 helm upgrade strimzi-kafka-operator oci://quay.io/strimzi-helm/strimzi-kafka-operator \
   --version ${STRIMZI_VERSION} \
   --namespace kafka-control-plane \

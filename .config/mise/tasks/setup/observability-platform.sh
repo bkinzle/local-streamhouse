@@ -168,6 +168,47 @@ config:
           - otlphttp/openobserve
 EOF
 
+# OTel Collector for other apps
+helm upgrade --repo https://open-telemetry.github.io/opentelemetry-helm-charts otel-collector-apps opentelemetry-collector \
+  --version ${OPENTELEMETRY_OPERATOR_VERSION} \
+  --namespace observability-platform \
+  --install \
+  --values - <<EOF
+image:
+  repository: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib
+mode: deployment
+replicaCount: 1
+command:
+  name: otelcol-contrib
+resources:
+  limits:
+    memory: 2Gi
+config:
+  receivers:
+    kafkametrics:
+      brokers:
+        - kafka-kafka-bootstrap.streamhouse.svc.cluster.local:9092
+      protocol_version: ${KAFKA_VERSION}
+      collection_interval: 10s
+      scrapers:
+        - brokers
+        - topics
+        - consumers
+  exporters:
+    otlphttp/openobserve:
+      endpoint: http://openobserve-router.observability-platform.svc:5080/api/default
+      headers:
+        Authorization: Basic cm9vdEBleGFtcGxlLmNvbTpDb21wbGV4cGFzcyMxMjM=
+        stream-name: streamhouse_apps
+  service:
+    pipelines:
+      metrics:
+        receivers:
+          - kafkametrics
+        exporters:
+          - otlphttp/openobserve
+EOF
+
 # kubectl apply -n observability-platform -f - <<EOF
 # apiVersion: gateway.networking.k8s.io/v1
 # kind: HTTPRoute
