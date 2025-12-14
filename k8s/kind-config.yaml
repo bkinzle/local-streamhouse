@@ -33,6 +33,8 @@ nodes:
   - role: worker
     labels:
       topology.kubernetes.io/zone: "us-central1-a"
+      # This is a workaround to be able to use a single k8s node for hostPort mappings needed for north/south traffic into the k8s cluster
+      # as only a single worker node can bind to the same hostPort on the host machine (your laptop)... it creates a bottleneck but is acceptable for local development
       ingress-ready: "true"
     image: "kindest/node:v$KUBERNETES_VERSION"
     extraMounts:
