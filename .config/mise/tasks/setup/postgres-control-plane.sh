@@ -18,7 +18,7 @@ config:
 EOF
 
 helm upgrade atlas-operator oci://ghcr.io/ariga/charts/atlas-operator \
-  --version 0.7.13 \
+  --version 0.7.14 \
   --namespace postgres-control-plane \
   --install \
   --rollback-on-failure \
