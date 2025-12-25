@@ -110,6 +110,6 @@ KEYCLOAK_VERSION = "26.4.7"
     { tasks = ["setup:envoy-gateway-proxy", "setup:metrics-server", "setup:minio-operator", "setup:postgres-control-plane", "setup:kafka-control-plane"] },
     { tasks = ["setup:streamhouse-object-store"] },
     { tasks = ["setup:kafka-cluster", "setup:kafka-topics"] },
-    { tasks = ["setup:observability-platform", "setup:streamhouse-relational-db", "setup:kafka-schema-registry", "setup:kafka-ui"] },
-    { tasks = ["setup:keycloak"] },
+    { tasks = ["setup:streamhouse-relational-db", "setup:kafka-schema-registry", "setup:kafka-ui"] },
+    { tasks = ["setup:observability-platform", "setup:keycloak"] },
   ]

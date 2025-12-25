@@ -8,6 +8,15 @@ kubectl apply -n streamhouse -f - <<EOF
 apiVersion: v1
 kind: Secret
 metadata:
+  name: ${PG_CLUSTER_NAME}-openobserve-admin
+type: kubernetes.io/basic-auth
+stringData:
+  username: openobserve_admin
+  password: iWillNeverTell
+---
+apiVersion: v1
+kind: Secret
+metadata:
   name: ${PG_CLUSTER_NAME}-keycloak-admin
 type: kubernetes.io/basic-auth
 stringData:
@@ -64,6 +73,11 @@ spec:
   
   managed:
     roles:
+      - name: openobserve_admin
+        login: true
+        passwordSecret:
+          name: ${PG_CLUSTER_NAME}-openobserve-admin
+        createdb: true
       - name: keycloak_admin
         login: true
         passwordSecret:
@@ -134,6 +148,19 @@ spec:
         metric_value jsonb null,
         attributes jsonb
       );
+EOF
+
+# Create the openobserve database
+kubectl apply -n streamhouse -f - <<EOF
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: openobserve
+spec:
+  cluster:
+    name: ${PG_CLUSTER_NAME}
+  name: openobserve
+  owner: openobserve_admin
 EOF
 
 # Create the keycloak database

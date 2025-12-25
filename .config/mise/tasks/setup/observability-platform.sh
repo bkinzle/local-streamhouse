@@ -23,9 +23,13 @@ replicaCount:
   zplane: 0
   reportserver: 0
   actions: 1
+postgres:
+  enabled: false
 auth:
   ZO_S3_ACCESS_KEY: "minio"
   ZO_S3_SECRET_KEY: "minio123"
+  ZO_META_POSTGRES_DSN: "postgres://openobserve_admin:iWillNeverTell@${PG_CLUSTER_NAME}-rw.streamhouse.svc:5432/openobserve"
+  OPENFGA_DATASTORE_URI: "postgres://openobserve_admin:iWillNeverTell@${PG_CLUSTER_NAME}-rw.streamhouse.svc:5432/openobserve"
 config:
   ZO_S3_SERVER_URL: http://minio.streamhouse.svc
   ZO_S3_BUCKET_NAME: openobserve
@@ -73,7 +77,7 @@ spec:
         port: 5081
 EOF
 
-# OTel Collector for K8s nodes/kublet metrics and logs
+# OTel Collector for K8s nodes/kubelet metrics and logs
 helm upgrade --repo https://open-telemetry.github.io/opentelemetry-helm-charts otel-collector-k8s-nodes opentelemetry-collector \
   --version ${OPENTELEMETRY_OPERATOR_VERSION} \
   --namespace observability-platform \
