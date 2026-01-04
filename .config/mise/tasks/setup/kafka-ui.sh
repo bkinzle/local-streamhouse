@@ -8,7 +8,7 @@ set -euo pipefail
 docker build -t localhost:${LOCAL_REGISTRY_PORT}/kafbat/kafka-ui:0.0.0 ${MISE_PROJECT_ROOT}/kafka-ui --push
 
 helm upgrade --repo https://ui.charts.kafbat.io kafka-ui kafka-ui \
-  --version 1.5.3 \
+  --version 1.6.0 \
   --namespace kafka-control-plane \
   --install \
   --values - <<EOF
