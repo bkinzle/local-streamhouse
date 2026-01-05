@@ -45,4 +45,17 @@ spec:
   config:
     retention.ms: 60000
     cleanup.policy: delete
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: product-feature-usage-events
+  labels:
+    strimzi.io/cluster: kafka
+spec:
+  partitions: 3
+  replicas: 3
+  config:
+    retention.ms: 120000
+    cleanup.policy: delete
 EOF
