@@ -189,15 +189,35 @@ resources:
     memory: 2Gi
 config:
   receivers:
-    kafkametrics:
+    kafkametrics/chaos:
       brokers:
-        - kafka-kafka-bootstrap.streamhouse.svc.cluster.local:9092
+        - chaos-kafka-kafka-bootstrap.streamhouse.svc.cluster.local:9092
       protocol_version: ${KAFKA_VERSION}
       collection_interval: 10s
       scrapers:
         - brokers
         - topics
         - consumers
+    kafkametrics/stable:
+      brokers:
+        - stable-kafka-kafka-bootstrap.streamhouse.svc.cluster.local:9092
+      protocol_version: ${KAFKA_VERSION}
+      collection_interval: 10s
+      scrapers:
+        - brokers
+        - topics
+        - consumers
+  processors:
+    resource/chaos-kafka:
+      attributes:
+        - key: cluster_name
+          value: chaos-kafka
+          action: upsert
+    resource/stable-kafka:
+      attributes:
+        - key: cluster_name
+          value: stable-kafka
+          action: upsert
   exporters:
     otlphttp/openobserve:
       endpoint: http://openobserve-router.observability-platform.svc:5080/api/default
@@ -206,9 +226,18 @@ config:
         stream-name: streamhouse_apps
   service:
     pipelines:
-      metrics:
+      metrics/chaos-kafka:
         receivers:
-          - kafkametrics
+          - kafkametrics/chaos
+        processors:
+          - resource/chaos-kafka
+        exporters:
+          - otlphttp/openobserve
+      metrics/stable-kafka:
+        receivers:
+          - kafkametrics/stable
+        processors:
+          - resource/stable-kafka
         exporters:
           - otlphttp/openobserve
 EOF

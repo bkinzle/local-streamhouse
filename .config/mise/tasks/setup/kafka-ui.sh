@@ -20,9 +20,28 @@ image:
 yamlApplicationConfig:
   kafka:
     clusters:
-      - name: kafka-kafka
-        bootstrapServers: kafka-kafka-bootstrap.streamhouse.svc.cluster.local:9092
-        schemaRegistry: http://schema-registry.kafka-control-plane.svc.cluster.local:8081
+      - name: chaos-kafka
+        bootstrapServers: chaos-kafka-kafka-bootstrap.streamhouse.svc.cluster.local:9092
+        schemaRegistry: http://chaos-schema-registry.kafka-control-plane.svc.cluster.local:8081
+        metrics:
+          port: 9999
+          type: JMX
+        serde:
+          - name: ProtobufFile
+            topicKeysPattern: engine-reports-stats|engine-reports-operation-stats
+            topicValuesPattern: engine-reports-stats|engine-reports-operation-stats|feature-usage-analytics
+            properties:
+              protobufFilesDir: "/protos"
+              protobufMessageNameForKeyByTopic:
+                engine-reports-stats: mdg.engine.proto.ReportKafkaKey
+                engine-reports-operation-stats: mdg.engine.proto.ReportKafkaKey
+              protobufMessageNameByTopic:
+                engine-reports-stats: mdg.engine.proto.StatsKafkaValue
+                engine-reports-operation-stats: mdg.engine.proto.StatsKafkaValue
+                feature-usage-analytics: mdg.engine.proto.featureusageanalytics.FeatureUsageAnalyticsValue
+      - name: stable-kafka
+        bootstrapServers: stable-kafka-kafka-bootstrap.streamhouse.svc.cluster.local:9092
+        schemaRegistry: http://stable-schema-registry.kafka-control-plane.svc.cluster.local:8081
         metrics:
           port: 9999
           type: JMX

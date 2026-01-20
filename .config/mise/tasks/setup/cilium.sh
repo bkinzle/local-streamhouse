@@ -5,7 +5,7 @@ set -euo pipefail
 #MISE depends=["check:kubecontext"]
 
 helm upgrade --repo https://helm.cilium.io cilium cilium \
-  --version 1.19.0-pre.4 \
+  --version 1.19.0-rc.0 \
   --namespace kube-system \
   --install \
   --rollback-on-failure \

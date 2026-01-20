@@ -16,9 +16,10 @@ helm upgrade envoy-gateway-controller oci://docker.io/envoyproxy/gateway-helm \
   --values - <<EOF
 deployment:
   replicas: 2
-  pod:
-    nodeSelector:
-      ingress-ready: "true"
+  # doesn't need to be on ingress-ready nodes, only the data plane does
+  # pod:
+  #   nodeSelector:
+  #     ingress-ready: "true"
 EOF
 
 # Step 2: Now that the Gateway control plane is installed, the Deployment and Service for the Proxy (data plane) can be configured with EnvoyProxy CRD
@@ -64,6 +65,12 @@ spec:
                 port: 5432
                 protocol: TCP
                 targetPort: 5432
+              # Port 9094 on your laptop gets forwarded to NodePort 30003 of the kind cluster
+              - name: kafka-9094
+                nodePort: 30003
+                port: 9094
+                protocol: TCP
+                targetPort: 9094
 EOF
 
 # Step 3: Setup the standard k8s GatewayClass having it use the Envoy Gateway controller (by creating the EnvoyProxy first we avoid re-configure/deploy disruption)
@@ -119,11 +126,13 @@ spec:
         namespaces:
           from: All
     - name: kafka
-      protocol: TCP
-      port: 9092
+      protocol: TLS
+      port: 9094
+      tls:
+        mode: Passthrough
       allowedRoutes:
         kinds:
-          - kind: TCPRoute
+          - kind: TLSRoute
         namespaces:
           from: All
 EOF
