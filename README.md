@@ -58,4 +58,6 @@ Once spun up the following endpoints are available:
 - openobserve-grpc.localtest.me:443
 - localtest.me:5432 (for postgres)
 - bootstrap.stable-kafka.localtest.me:9094 (for kafka)
+- localhost:5010 (for container registry outside of cluster)
+- streamhouse-registry:4678 (for container registry inside of cluster)
 - (Flink UI endpoints per Flink app will come from separate repo with application code)
