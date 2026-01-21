@@ -58,3 +58,4 @@ Once spun up the following endpoints are available:
 - openobserve-grpc.localtest.me:443
 - localtest.me:5432 (for postgres)
 - bootstrap.stable-kafka.localtest.me:9094 (for kafka)
+- (Flink UI endpoints per Flink app will come from separate repo with application code)
