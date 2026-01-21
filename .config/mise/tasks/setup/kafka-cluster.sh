@@ -160,6 +160,34 @@ EOF
 
 # The stable kafka cluster
 kubectl apply -n streamhouse -f - <<EOF
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: kafka-listeners-cert
+spec:
+  secretName: kafka-listeners-tls
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS8
+    size: 2048
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - "bootstrap.stable-kafka.${DNSMASQ_DOMAIN}"
+    - "0.stable-kafka.${DNSMASQ_DOMAIN}"
+    - "1.stable-kafka.${DNSMASQ_DOMAIN}"
+    - "2.stable-kafka.${DNSMASQ_DOMAIN}"
+    - "*.stable-kafka.${DNSMASQ_DOMAIN}"
+  issuerRef:
+    name: ca-issuer
+    kind: ClusterIssuer
+    group: cert-manager.io
+EOF
+
+while ! kubectl get secret kafka-listeners-tls -n streamhouse &>/dev/null; do echo "Waiting for kafka-listeners-tls secret. CTRL-C to exit."; sleep 1; done
+
+kubectl apply -n streamhouse -f - <<EOF
 apiVersion: kafka.strimzi.io/v1
 kind: KafkaNodePool
 metadata:
@@ -227,30 +255,6 @@ spec:
 EOF
 
 kubectl apply -n streamhouse -f - <<EOF
-apiVersion: cert-manager.io/v1
-kind: Certificate
-metadata:
-  name: kafka-listeners-cert
-spec:
-  secretName: kafka-listeners-tls
-  privateKey:
-    algorithm: RSA
-    encoding: PKCS8
-    size: 2048
-  usages:
-    - server auth
-    - client auth
-  dnsNames:
-    - "bootstrap.stable-kafka.${DNSMASQ_DOMAIN}"
-    - "0.stable-kafka.${DNSMASQ_DOMAIN}"
-    - "1.stable-kafka.${DNSMASQ_DOMAIN}"
-    - "2.stable-kafka.${DNSMASQ_DOMAIN}"
-    - "*.stable-kafka.${DNSMASQ_DOMAIN}"
-  issuerRef:
-    name: ca-issuer
-    kind: ClusterIssuer
-    group: cert-manager.io
----
 apiVersion: kafka.strimzi.io/v1
 kind: Kafka
 metadata:

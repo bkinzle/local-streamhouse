@@ -40,6 +40,7 @@ The following infrastructure components are automatically spun up:
   - Confluent Schema Registry
   - Kafbat (Kafka UI)
 - Flink Kubernetes Operator (separate repo contains Flink Application code)
+- Druid (real-time OLAP)
 - OpenObserve (Open Source Observability Platform similar to Datadog)
 - OpenTelemetry Collectors (integrated with OpenObserve)
 - Keycloak (Open Source IdP)
@@ -51,6 +52,7 @@ Once spun up the following endpoints are available:
 - https://pgadmin4.localtest.me
 - https://kafka-ui.localtest.me
 - https://datalake.localtest.me
+- https://druid-router.localtest.me
 - https://openobserve.localtest.me
 - https://hubble-ui.localtest.me
 - https://keycloak.localtest.me

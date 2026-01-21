@@ -31,6 +31,15 @@ type: kubernetes.io/basic-auth
 stringData:
   username: catalog_admin
   password: iWillNeverTell
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: ${PG_CLUSTER_NAME}-druid-admin
+type: kubernetes.io/basic-auth
+stringData:
+  username: druid_admin
+  password: iWillNeverTell
 EOF
 
 while ! kubectl get secret ${PG_CLUSTER_NAME}-catalog-admin -n streamhouse &>/dev/null; do echo "Waiting for ${PG_CLUSTER_NAME}-catalog-admin secret. CTRL-C to exit."; sleep 1; done
@@ -87,6 +96,11 @@ spec:
         login: true
         passwordSecret:
           name: ${PG_CLUSTER_NAME}-catalog-admin
+        createdb: true
+      - name: druid_admin
+        login: true
+        passwordSecret:
+          name: ${PG_CLUSTER_NAME}-druid-admin
         createdb: true
 EOF
 
@@ -187,6 +201,19 @@ spec:
     name: ${PG_CLUSTER_NAME}
   name: iceberg_catalog
   owner: catalog_admin
+EOF
+
+# Create the druid database
+kubectl apply -n streamhouse -f - <<EOF
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: druid
+spec:
+  cluster:
+    name: ${PG_CLUSTER_NAME}
+  name: druid
+  owner: druid_admin
 EOF
 
 export PG_USERNAME=$(kubectl get secret -n streamhouse ${PG_CLUSTER_NAME}-superuser -o jsonpath='{.data.username}' | base64 -d)

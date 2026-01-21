@@ -23,6 +23,7 @@ tenant:
     - name: zone-1-silver
     - name: zone-2-gold
     - name: openobserve
+    - name: druid-deep-storage
   certificate:
     requestAutoCert: false
 EOF
