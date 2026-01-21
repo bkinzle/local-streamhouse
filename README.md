@@ -44,7 +44,7 @@ The following infrastructure components are automatically spun up:
 - OpenObserve (Open Source Observability Platform similar to Datadog)
 - OpenTelemetry Collectors (integrated with OpenObserve)
 - Keycloak (Open Source IdP)
-- (there's probably more I forgot to list here)
+- Lakekeeper (Iceberg REST Catalog)
 
 ## Endpoints
 Once spun up the following endpoints are available:
@@ -56,6 +56,7 @@ Once spun up the following endpoints are available:
 - https://openobserve.localtest.me
 - https://hubble-ui.localtest.me
 - https://keycloak.localtest.me
+- https://lakekeeper.localtest.me
 - datalake-api.localtest.me:80
 - openobserve-grpc.localtest.me:443
 - localtest.me:5432 (for postgres)
