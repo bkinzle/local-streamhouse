@@ -15,13 +15,13 @@ mise teardown
 ## Infrastructure
 The following infrastructure components are automatically spun up:
 
-- Realistic DNS using the `localtest.me` domain (which automatically resolves to `127.0.0.1`) and TLS
+- Realistic DNS using the `localtest.me` domain (which automatically resolves to `127.0.0.1`) and TLS certs
 - OCI compliant Container Registry
 - Kubernetes Cluster
   - Control plane (1 node)
   - Data plane (3 nodes)
     - Each labeled with one of `topology.kubernetes.io/zone` {us-central1-a, us-central1-b, us-central1-c}
-  - Port-forwards to simulate north/south traffic into cluster {80, 443, 5234, 9094}
+  - Port-forwards to simulate north/south traffic into cluster {80, 443, 5234, 9094, etc.}
   - Trusted self-signed CA cert (only works on macOS)
   - Integrated to trust Container Registry
   - Automatically sets active kubecontext to use cluster
@@ -42,4 +42,4 @@ The following infrastructure components are automatically spun up:
 - OpenObserve (Open Source Observability Platform similar to Datadog)
 - OpenTelemetry Collectors (integrated with OpenObserve)
 - Keycloak (Open Source IdP)
-- (more coming soon)
+- (there's probably more I forgot to list here)
