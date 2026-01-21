@@ -32,6 +32,7 @@ The following infrastructure components are automatically spun up:
 - MinIO (S3 compatible Object Storage)
 - PostgreSQL (using CloudNativePG for HA architecture)
   - Atlas Operator (for declarative database management)
+  - pgAdmin (integrated with server)
 - Kafka (using Strimzi Kubernetes Operator)
   - Rack aware topology
   - Topic Operator (for declarative topic management)
@@ -43,3 +44,17 @@ The following infrastructure components are automatically spun up:
 - OpenTelemetry Collectors (integrated with OpenObserve)
 - Keycloak (Open Source IdP)
 - (there's probably more I forgot to list here)
+
+## Endpoints
+Once spun up the following endpoints are available:
+
+- https://pgadmin4.localtest.me
+- https://kafka-ui.localtest.me
+- https://datalake.localtest.me
+- https://openobserve.localtest.me
+- https://hubble-ui.localtest.me
+- https://keycloak.localtest.me
+- datalake-api.localtest.me:80
+- openobserve-grpc.localtest.me:443
+- localtest.me:5432 (for postgres)
+- bootstrap.stable-kafka.localtest.me:9094 (for kafka)
