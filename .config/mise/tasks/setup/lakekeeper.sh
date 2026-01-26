@@ -62,7 +62,7 @@ curl -X POST https://lakekeeper.localtest.me/management/v1/warehouse \
   -H "Content-Type: application/json" \
   -d @- <<'JSON'
 {
-  "warehouse-name": "zone-0-bronze",
+  "warehouse-name": "zone_0_bronze",
   "storage-profile": {
     "type": "s3",
     "endpoint": "http://minio.streamhouse.svc",
@@ -90,7 +90,7 @@ curl -X POST https://lakekeeper.localtest.me/management/v1/warehouse \
   -H "Content-Type: application/json" \
   -d @- <<'JSON'
 {
-  "warehouse-name": "zone-1-silver",
+  "warehouse-name": "zone_1_silver",
   "storage-profile": {
     "type": "s3",
     "endpoint": "http://minio.streamhouse.svc",
@@ -118,7 +118,7 @@ curl -X POST https://lakekeeper.localtest.me/management/v1/warehouse \
   -H "Content-Type: application/json" \
   -d @- <<'JSON'
 {
-  "warehouse-name": "zone-2-gold",
+  "warehouse-name": "zone_2_gold",
   "storage-profile": {
     "type": "s3",
     "endpoint": "http://minio.streamhouse.svc",
