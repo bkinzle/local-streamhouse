@@ -47,6 +47,16 @@ EOF
 # Wait for Lakekeeper to be ready
 kubectl rollout status deployment/lakekeeper -n streamhouse --timeout=600s &>/dev/null
 
+# Bootstrap Lakekeeper, accept terms of use
+curl -X POST https://lakekeeper.localtest.me/management/v1/bootstrap \
+  -H "Content-Type: application/json" \
+  -d @- <<'JSON'
+{
+  "accept-terms-of-use": true,
+  "is-operator": true
+}
+JSON
+
 # Create a warehouse in Lakekeeper using it's REST API, pointing to the datalake's zone-0-bronze bucket... (warehouse in the front, lake in the back)
 curl -X POST https://lakekeeper.localtest.me/management/v1/warehouse \
   -H "Content-Type: application/json" \
