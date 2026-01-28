@@ -1,8 +1,10 @@
 # Local Streamhouse
-Creates local cloud native infrastructure for an Open Streamhouse, striving for parity with production.  Helpful for chaos engineering, experimenting with different fault modes as well as testing and understanding recovery methods.
+Creates opinionated, local, cloud native infrastructure for an Open Streamhouse, striving for parity with production.  Helpful for chaos engineering, deep understanding of distributed systems, experimenting with different fault modes, as well as testing and verifying recovery methods.
+
+Provides as simple of an experience as `docker compose up` and `docker compose down` without the shortcomings of docker compose and cloud native infrastructure (where much of the value comes from being built on top of the Kubernetes API).
 
 ## Quick Start
-The following idempotent, all-in-one command will spin up the stack:
+The following idempotent, all-in-one command will spin up the stack (go ahead and get up, stretch, grab a coffee, use the restroom...):
 ```shell
 mise setup
 ```
@@ -21,7 +23,7 @@ The following infrastructure components are automatically spun up:
   - Control plane (1 node)
   - Data plane (3 nodes)
     - Each labeled with one of `topology.kubernetes.io/zone` {us-central1-a, us-central1-b, us-central1-c}
-  - Port-forwards to simulate north/south traffic into cluster {80, 443, 5234, 9094, etc.}
+  - Port-forwards to simulate north/south traffic into cluster {80, 443, 5234, 9000, 9094, etc.}
   - Trusted self-signed CA cert (only works on macOS)
   - Integrated to trust Container Registry
   - Automatically sets active kubecontext to use cluster
@@ -40,7 +42,9 @@ The following infrastructure components are automatically spun up:
   - Confluent Schema Registry
   - Kafbat (Kafka UI)
 - Flink Kubernetes Operator (separate repo contains Flink Application code)
-- Druid (real-time OLAP)
+- Clickhouse (real-time, columnar OLAP)
+  - Integrated with HyperDX observability platform
+- Druid (real-time, columnar OLAP)
 - OpenObserve (Open Source Observability Platform similar to Datadog)
 - OpenTelemetry Collectors (integrated with OpenObserve)
 - Keycloak (Open Source IdP)
@@ -52,6 +56,7 @@ Once spun up the following endpoints are available:
 - https://pgadmin4.localtest.me
 - https://kafka-ui.localtest.me
 - https://datalake.localtest.me
+- https://clickhouse-hyperdx.localtest.me
 - https://druid-router.localtest.me
 - https://openobserve.localtest.me
 - https://hubble-ui.localtest.me
@@ -60,6 +65,7 @@ Once spun up the following endpoints are available:
 - datalake-api.localtest.me:80
 - openobserve-grpc.localtest.me:443
 - localtest.me:5432 (for postgres)
+- localtest.me:9000 (for native clickhouse)
 - bootstrap.stable-kafka.localtest.me:9094 (for kafka)
 - localhost:5010 (for container registry outside of cluster)
 - streamhouse-registry:4678 (for container registry inside of cluster)

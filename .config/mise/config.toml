@@ -111,7 +111,7 @@ KEYCLOAK_VERSION = "26.5.2"
     { tasks = ["setup:streamhouse-object-store"] },
     { tasks = ["setup:kafka-cluster", "setup:kafka-topics"] },
     { tasks = ["setup:streamhouse-relational-db", "setup:kafka-schema-registry", "setup:kafka-ui"] },
-    { tasks = ["setup:observability-platform", "setup:keycloak", "setup:lakekeeper"] },
+    { tasks = ["setup:observability-platform", "setup:keycloak", "setup:lakekeeper", "setup:clickhouse"] },
   ]
 
 # manually run 'mise setup:druid' when needed -- not part of the default setup flow due to its resource intensity

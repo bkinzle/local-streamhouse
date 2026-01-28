@@ -5,7 +5,7 @@ set -euo pipefail
 #MISE depends=["check:kubecontext"]
 
 helm upgrade --repo https://charts.openobserve.ai openobserve openobserve \
-  --version 0.40.1 \
+  --version 0.40.2 \
   --namespace observability-platform \
   --create-namespace \
   --install \
@@ -207,6 +207,18 @@ config:
         - brokers
         - topics
         - consumers
+    # Data sources: traces, metrics, logs
+    otlp/hyperdx:
+      protocols:
+        grpc:
+          include_metadata: true
+          endpoint: 0.0.0.0:4327
+        http:
+          cors:
+            allowed_origins: ['*']
+            allowed_headers: ['*']
+          include_metadata: true
+          endpoint: 0.0.0.0:4328
   processors:
     resource/chaos-kafka:
       attributes:
@@ -218,12 +230,112 @@ config:
         - key: cluster_name
           value: stable-kafka
           action: upsert
+    batch:
+      send_batch_size: 8192
+      timeout: 200ms
+      send_batch_max_size: 0
+    memory_limiter:
+      # 80% of maximum memory up to 2G
+      limit_mib: 1500
+      # 25% of limit up to 2G
+      spike_limit_mib: 512
+      check_interval: 5s
+    transform:
+      log_statements:
+        - context: log
+          error_mode: ignore
+          statements:
+            # JSON parsing: Extends log attributes with the fields from structured log body content, either as an OTEL map or
+            # as a string containing JSON content.
+            - set(log.cache, ExtractPatterns(log.body, "(?P<0>(\\\\{.*\\\\}))")) where
+              IsString(log.body)
+            - merge_maps(log.attributes, ParseJSON(log.cache["0"]), "upsert")
+              where IsMap(log.cache)
+            - flatten(log.attributes) where IsMap(log.cache)
+            - merge_maps(log.attributes, log.body, "upsert") where IsMap(log.body)
+        - context: log
+          error_mode: ignore
+          conditions:
+            - severity_number == 0 and severity_text == ""
+          statements:
+            # Infer: extract the first log level keyword from the first 256 characters of the body
+            - set(log.cache["substr"], log.body.string) where Len(log.body.string)
+              < 256
+            - set(log.cache["substr"], Substring(log.body.string, 0, 256)) where
+              Len(log.body.string) >= 256
+            - set(log.cache, ExtractPatterns(log.cache["substr"],
+              "(?i)(?P<0>(alert|crit|emerg|fatal|error|err|warn|notice|debug|dbug|trace))"))
+            # Infer: detect FATAL
+            - set(log.severity_number, SEVERITY_NUMBER_FATAL) where
+              IsMatch(log.cache["0"], "(?i)(alert|crit|emerg|fatal)")
+            - set(log.severity_text, "fatal") where log.severity_number ==
+              SEVERITY_NUMBER_FATAL
+            # Infer: detect ERROR
+            - set(log.severity_number, SEVERITY_NUMBER_ERROR) where
+              IsMatch(log.cache["0"], "(?i)(error|err)")
+            - set(log.severity_text, "error") where log.severity_number ==
+              SEVERITY_NUMBER_ERROR
+            # Infer: detect WARN
+            - set(log.severity_number, SEVERITY_NUMBER_WARN) where
+              IsMatch(log.cache["0"], "(?i)(warn|notice)")
+            - set(log.severity_text, "warn") where log.severity_number ==
+              SEVERITY_NUMBER_WARN
+            # Infer: detect DEBUG
+            - set(log.severity_number, SEVERITY_NUMBER_DEBUG) where
+              IsMatch(log.cache["0"], "(?i)(debug|dbug)")
+            - set(log.severity_text, "debug") where log.severity_number ==
+              SEVERITY_NUMBER_DEBUG
+            # Infer: detect TRACE
+            - set(log.severity_number, SEVERITY_NUMBER_TRACE) where
+              IsMatch(log.cache["0"], "(?i)(trace)")
+            - set(log.severity_text, "trace") where log.severity_number ==
+              SEVERITY_NUMBER_TRACE
+            # Infer: else
+            - set(log.severity_text, "info") where log.severity_number == 0
+            - set(log.severity_number, SEVERITY_NUMBER_INFO) where
+              log.severity_number == 0
+        - context: log
+          error_mode: ignore
+          statements:
+            # Normalize the severity_text case
+            - set(log.severity_text, ConvertCase(log.severity_text, "lower"))
+  connectors:
+    routing/logs:
+      default_pipelines:
+        - logs/out-default
+      error_mode: ignore
+      table:
+        - context: log
+          statement: route() where IsMatch(attributes["rr-web.event"], ".*")
+          pipelines:
+            - logs/out-rrweb
   exporters:
     otlphttp/openobserve:
       endpoint: http://openobserve-router.observability-platform.svc:5080/api/default
       headers:
         Authorization: Basic cm9vdEBleGFtcGxlLmNvbTpDb21wbGV4cGFzcyMxMjM=
         stream-name: streamhouse_apps
+    clickhouse/rrweb:
+      database: default
+      endpoint: tcp://clickstack-clickhouse.streamhouse.svc:9000?dial_timeout=10s
+      ttl: 720h
+      logs_table_name: hyperdx_sessions
+      timeout: 5s
+      retry_on_failure:
+        enabled: true
+        initial_interval: 5s
+        max_interval: 30s
+        max_elapsed_time: 300s
+    clickhouse:
+      database: default
+      endpoint: tcp://clickstack-clickhouse.streamhouse.svc:9000?dial_timeout=10s
+      ttl: 720h
+      timeout: 5s
+      retry_on_failure:
+        enabled: true
+        initial_interval: 5s
+        max_interval: 30s
+        max_elapsed_time: 300s
   service:
     pipelines:
       metrics/chaos-kafka:
@@ -240,6 +352,44 @@ config:
           - resource/stable-kafka
         exporters:
           - otlphttp/openobserve
+      traces:
+        receivers:
+          - otlp/hyperdx
+        processors: 
+          - memory_limiter
+          - batch
+        exporters:
+          - clickhouse
+      metrics:
+        receivers:
+          - otlp/hyperdx
+        processors:
+          - memory_limiter
+          - batch
+        exporters:
+          - clickhouse
+      logs/in:
+        receivers:
+          - otlp/hyperdx
+        exporters:
+          - routing/logs
+      logs/out-default:
+        receivers:
+          - routing/logs
+        processors:
+          - memory_limiter
+          - transform
+          - batch
+        exporters:
+          - clickhouse
+      logs/out-rrweb:
+        receivers:
+          - routing/logs
+        processors:
+          - memory_limiter
+          - batch
+        exporters:
+          - clickhouse/rrweb
 EOF
 
 # kubectl apply -n observability-platform -f - <<EOF

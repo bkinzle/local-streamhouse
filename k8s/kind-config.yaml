@@ -68,6 +68,11 @@ nodes:
       hostPort: 9094
       listenAddress: "127.0.0.1"
       protocol: TCP
+    # Port for gateway tcp for native clickhouse
+    - containerPort: 30004
+      hostPort: 9000
+      listenAddress: "127.0.0.1"
+      protocol: TCP
   - role: worker
     labels:
       topology.kubernetes.io/zone: "us-central1-b"
