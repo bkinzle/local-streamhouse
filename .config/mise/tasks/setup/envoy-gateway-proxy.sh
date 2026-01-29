@@ -77,6 +77,12 @@ spec:
                 port: 9000
                 protocol: TCP
                 targetPort: 9000
+              # Port 9030 on your laptop gets forwarded to NodePort 30005 of the kind cluster
+              - name: starrocks-9030
+                nodePort: 30005
+                port: 9030
+                protocol: TCP
+                targetPort: 9030
 EOF
 
 # Step 3: Setup the standard k8s GatewayClass having it use the Envoy Gateway controller (by creating the EnvoyProxy first we avoid re-configure/deploy disruption)
@@ -144,6 +150,14 @@ spec:
     - name: clickhouse
       protocol: TCP
       port: 9000
+      allowedRoutes:
+        kinds:
+          - kind: TCPRoute
+        namespaces:
+          from: All
+    - name: starrocks
+      protocol: TCP
+      port: 9030
       allowedRoutes:
         kinds:
           - kind: TCPRoute

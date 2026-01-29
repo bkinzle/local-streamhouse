@@ -42,9 +42,10 @@ The following infrastructure components are automatically spun up:
   - Confluent Schema Registry
   - Kafbat (Kafka UI)
 - Flink Kubernetes Operator (separate repo contains Flink Application code)
-- Clickhouse (real-time, columnar OLAP)
+- Clickhouse (real-time, columnar, OLAP)
   - Integrated with HyperDX observability platform
-- Druid (real-time, columnar OLAP)
+- StarRocks (real-time, distributed MPP, columnar, OLAP)
+- Druid (real-time, columnar, OLAP)
 - OpenObserve (Open Source Observability Platform similar to Datadog)
 - OpenTelemetry Collectors (integrated with OpenObserve)
 - Keycloak (Open Source IdP)
@@ -57,6 +58,7 @@ Once spun up the following endpoints are available:
 - https://kafka-ui.localtest.me
 - https://datalake.localtest.me
 - https://clickhouse-hyperdx.localtest.me
+- https://starrocks.localtest.me
 - https://druid-router.localtest.me
 - https://openobserve.localtest.me
 - https://hubble-ui.localtest.me
@@ -66,6 +68,7 @@ Once spun up the following endpoints are available:
 - openobserve-grpc.localtest.me:443
 - localtest.me:5432 (for postgres)
 - localtest.me:9000 (for native clickhouse)
+- localtest.me:9030 (for mysql starrocks)
 - bootstrap.stable-kafka.localtest.me:9094 (for kafka)
 - localhost:5010 (for container registry outside of cluster)
 - streamhouse-registry:4678 (for container registry inside of cluster)
