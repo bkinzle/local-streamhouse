@@ -22,7 +22,7 @@ EOF
 )
 
 helm upgrade cert-manager oci://quay.io/jetstack/charts/cert-manager \
-  --version v1.19.2 \
+  --version v1.19.3 \
   --namespace cert-manager \
   --create-namespace \
   --install \
