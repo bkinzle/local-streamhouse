@@ -5,7 +5,7 @@ set -euo pipefail
 #MISE depends=["check:kubecontext"]
 
 helm upgrade --repo https://cloudnative-pg.github.io/charts cnpg cloudnative-pg \
-  --version 0.26.1 \
+  --version 0.27.1 \
   --namespace postgres-control-plane \
   --create-namespace \
   --install \
