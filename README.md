@@ -64,6 +64,7 @@ Once spun up the following endpoints are available:
 - https://hubble-ui.localtest.me
 - https://keycloak.localtest.me
 - https://lakekeeper.localtest.me
+- https://schema-registry.localtest.me
 - datalake-api.localtest.me:80
 - openobserve-grpc.localtest.me:443
 - localtest.me:5432 (for postgres)
