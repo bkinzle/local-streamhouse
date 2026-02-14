@@ -14,7 +14,7 @@ helm upgrade --repo https://wiremind.github.io/wiremind-helm-charts druid druid 
   --wait-for-jobs \
   --values - <<EOF
 image:
-  tag: 35.0.1
+  tag: 36.0.0
 extensions:
   loadList:
     - druid-basic-security

@@ -1,5 +1,5 @@
 # mise configuration file
-min_version = "2025.11.3"
+min_version = "2026.2.11"
 
 # Tools to install and their versions
 [tools]
@@ -25,16 +25,16 @@ DNSMASQ_DOMAIN = "localtest.me"
 LOCAL_REGISTRY_NAME = "{{ env.STACK_NAME }}-registry"
 LOCAL_REGISTRY_PORT = "5010"
 INCLUSTER_REGISTRY_PORT = "4678"
-KUBERNETES_VERSION = "1.35.0"
+KUBERNETES_VERSION = "1.35.1"
 ENVOY_PROXY_GATEWAY_VERSION = "0.0.0-latest"
 MINIO_HELM_VERSION = "7.1.1"
-POSTGRES_IMAGE = "ghcr.io/cloudnative-pg/postgresql:18.1-202602020815-system-trixie@sha256:4fb12fffc57f5ae87f8d3b422e8e75f7128b25ef3f7018e2651b9945a0c813af"
+POSTGRES_IMAGE = "ghcr.io/cloudnative-pg/postgresql:18.1-202602090816-system-trixie@sha256:0f3e97fc65c8c5e3f763250886bf1114d5260155ab1e22bf4358bc24c6037819"
 PG_CLUSTER_NAME = "{{ env.STACK_NAME }}-relational-db"
 STRIMZI_VERSION = "0.50.0"
 KAFKA_VERSION = "4.1.1"
 KAFKA_MINOR_VERSION = "4.1"
 OPENTELEMETRY_OPERATOR_VERSION = "0.145.0"
-KEYCLOAK_VERSION = "26.5.2"
+KEYCLOAK_VERSION = "26.5.3"
 
 # Task definitions
 [tasks."check:tool"]

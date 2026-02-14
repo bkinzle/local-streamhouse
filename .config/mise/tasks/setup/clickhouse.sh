@@ -5,7 +5,7 @@ set -euo pipefail
 #MISE depends=["check:kubecontext"]
 
 helm upgrade --repo https://clickhouse.github.io/ClickStack-helm-charts clickstack clickstack \
-  --version 1.1.0 \
+  --version 1.1.1 \
   --namespace streamhouse \
   --install \
   --rollback-on-failure \

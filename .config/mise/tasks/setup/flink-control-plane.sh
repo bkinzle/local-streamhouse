@@ -9,7 +9,7 @@ if ! helm plugin list | grep -q kustomize-renderer; then
   helm plugin install "$MISE_PROJECT_ROOT/.helm-plugins/kustomize-renderer"
 fi
 
-helm upgrade --repo https://downloads.apache.org/flink/flink-kubernetes-operator-1.13.0 flink-kubernetes-operator flink-kubernetes-operator \
+helm upgrade --repo https://downloads.apache.org/flink/flink-kubernetes-operator-1.14.0 flink-kubernetes-operator flink-kubernetes-operator \
   --namespace flink-control-plane \
   --create-namespace \
   --install \
