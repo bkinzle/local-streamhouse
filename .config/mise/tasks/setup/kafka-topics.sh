@@ -122,6 +122,6 @@ spec:
   partitions: 3
   replicas: 3
   config:
-    retention.ms: 120000
+    retention.ms: 180000
     cleanup.policy: delete
 EOF
