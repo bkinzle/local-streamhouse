@@ -5,7 +5,7 @@ set -euo pipefail
 #MISE depends=["check:kubecontext"]
 
 helm upgrade --repo https://charts.openobserve.ai openobserve openobserve \
-  --version 0.40.2 \
+  --version 0.60.0 \
   --namespace observability-platform \
   --create-namespace \
   --install \
