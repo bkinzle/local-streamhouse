@@ -47,8 +47,8 @@ EOF
 # Wait for Lakekeeper to be ready
 kubectl rollout status deployment/lakekeeper -n streamhouse --timeout=600s &>/dev/null
 
-# Bootstrap Lakekeeper, accept terms of use
-curl -X POST https://lakekeeper.localtest.me/management/v1/bootstrap \
+# Bootstrap Lakekeeper, accept terms of use (silenced — idempotent, returns 400 if already bootstrapped)
+curl -s -o /dev/null -X POST https://lakekeeper.localtest.me/management/v1/bootstrap \
   -H "Content-Type: application/json" \
   -d @- <<'JSON'
 {
@@ -58,7 +58,8 @@ curl -X POST https://lakekeeper.localtest.me/management/v1/bootstrap \
 JSON
 
 # Create a warehouse in Lakekeeper using it's REST API, pointing to the datalake's zone-0-bronze bucket... (warehouse in the front, lake in the back)
-curl -X POST https://lakekeeper.localtest.me/management/v1/warehouse \
+# Silenced — idempotent, returns 400 if warehouse already exists
+curl -s -o /dev/null -X POST https://lakekeeper.localtest.me/management/v1/warehouse \
   -H "Content-Type: application/json" \
   -d @- <<'JSON'
 {
@@ -85,8 +86,19 @@ curl -X POST https://lakekeeper.localtest.me/management/v1/warehouse \
 }
 JSON
 
-# Create a warehouse for the zone-1-silver
-curl -X POST https://lakekeeper.localtest.me/management/v1/warehouse \
+# Resolve the Iceberg REST catalog prefix for zone_0_bronze (Lakekeeper assigns a UUID)
+BRONZE_PREFIX=$(curl -s "https://lakekeeper.localtest.me/catalog/v1/config?warehouse=zone_0_bronze" \
+  | python3 -c "import sys,json; print(json.load(sys.stdin)['defaults']['prefix'])")
+
+# Create namespace for kafka sink landing data (skip if it already exists)
+if ! curl -sf -o /dev/null "https://lakekeeper.localtest.me/catalog/v1/${BRONZE_PREFIX}/namespaces/kafka_sink"; then
+  curl -s -X POST "https://lakekeeper.localtest.me/catalog/v1/${BRONZE_PREFIX}/namespaces" \
+    -H "Content-Type: application/json" \
+    -d '{"namespace": ["kafka_sink"]}'
+fi
+
+# Create a warehouse for the zone-1-silver (silenced — idempotent)
+curl -s -o /dev/null -X POST https://lakekeeper.localtest.me/management/v1/warehouse \
   -H "Content-Type: application/json" \
   -d @- <<'JSON'
 {
@@ -113,8 +125,8 @@ curl -X POST https://lakekeeper.localtest.me/management/v1/warehouse \
 }
 JSON
 
-# Create a warehouse for the zone-2-gold
-curl -X POST https://lakekeeper.localtest.me/management/v1/warehouse \
+# Create a warehouse for the zone-2-gold (silenced — idempotent)
+curl -s -o /dev/null -X POST https://lakekeeper.localtest.me/management/v1/warehouse \
   -H "Content-Type: application/json" \
   -d @- <<'JSON'
 {
