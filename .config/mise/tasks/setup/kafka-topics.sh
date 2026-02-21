@@ -63,6 +63,20 @@ spec:
   config:
     retention.ms: 120000
     cleanup.policy: delete
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: chaos-kafka-user-session-feature-activity
+  labels:
+    strimzi.io/cluster: chaos-kafka
+spec:
+  topicName: user-session-feature-activity
+  partitions: 3
+  replicas: 3
+  config:
+    retention.ms: 180000
+    cleanup.policy: delete
 EOF
 
 # Topics for the stable-kafka cluster
@@ -119,6 +133,20 @@ metadata:
     strimzi.io/cluster: stable-kafka
 spec:
   topicName: product-feature-usage-events
+  partitions: 3
+  replicas: 3
+  config:
+    retention.ms: 180000
+    cleanup.policy: delete
+---
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaTopic
+metadata:
+  name: stable-kafka-user-session-feature-activity
+  labels:
+    strimzi.io/cluster: stable-kafka
+spec:
+  topicName: user-session-feature-activity
   partitions: 3
   replicas: 3
   config:
