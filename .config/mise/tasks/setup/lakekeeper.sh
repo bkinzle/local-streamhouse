@@ -88,7 +88,7 @@ JSON
 
 # Resolve the Iceberg REST catalog prefix for zone_0_bronze (Lakekeeper assigns a UUID)
 BRONZE_PREFIX=$(curl -s "https://lakekeeper.localtest.me/catalog/v1/config?warehouse=zone_0_bronze" \
-  | python3 -c "import sys,json; print(json.load(sys.stdin)['defaults']['prefix'])")
+  | jq -r '.defaults.prefix')
 
 # Create namespace for kafka sink landing data (skip if it already exists)
 if ! curl -sf -o /dev/null "https://lakekeeper.localtest.me/catalog/v1/${BRONZE_PREFIX}/namespaces/kafka_sink"; then
